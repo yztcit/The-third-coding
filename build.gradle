@@ -1,4 +1,16 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+def fixProjectDeps(def map) {
+    map.each { entry ->
+        if (entry.value instanceof ProjectDescriptor) {
+            entry.value = rootProject.project(entry.value.path)
+        } else if (entry.value instanceof Map) {
+            fixProjectDeps(entry.value)
+        }
+    }
+}
+ext.deps = gradle.ext.deps
+fixProjectDeps(ext.deps)
+
 buildscript {
 
     repositories {

@@ -1,0 +1,18 @@
+def void applyDependencies(Project project) {
+    project.dependencies {
+        implementation fileTree(dir: "libs", include: ["*.jar"])
+        implementation Dependencies.kotlinStdLib
+        implementation Dependencies.coreKtx
+        implementation Dependencies.appCompat
+        implementation Dependencies.constraintlayout
+        testImplementation Dependencies.junit
+        androidTestImplementation Dependencies.xJunit
+        androidTestImplementation Dependencies.espresso
+
+        implementation deps.components.lib_primary_summary
+    }
+}
+
+ext {
+    applyDependencies = this.&applyDependencies
+}

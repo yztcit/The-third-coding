@@ -1,20 +1,19 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply from: 'config-build/deps.gradle'
 
 android {
     compileSdkVersion Versions.compileSdk
     buildToolsVersion Versions.buildToolsVersion
 
     defaultConfig {
-        applicationId "com.nttn.thirdcoding"
         minSdkVersion Versions.minSdk
         targetSdkVersion Versions.targetSdk
         versionCode Versions.appVersionCode
         versionName Versions.appVersionName
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
@@ -25,4 +24,13 @@ android {
     }
 }
 
-applyDependencies(this.project)
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation Dependencies.kotlinStdLib
+    implementation Dependencies.coreKtx
+    implementation Dependencies.appCompat
+    testImplementation Dependencies.junit
+    androidTestImplementation Dependencies.xJunit
+    androidTestImplementation Dependencies.espresso
+
+}

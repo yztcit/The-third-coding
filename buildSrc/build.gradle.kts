@@ -1,9 +1,9 @@
 //build.gradle.kts
 import org.gradle.kotlin.dsl.`kotlin-dsl`
 
-        repositories{
-            jcenter()
-        }
+repositories {
+    jcenter()
+}
 
 plugins {
     `kotlin-dsl`
