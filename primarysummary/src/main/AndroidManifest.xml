@@ -2,6 +2,7 @@
     package="com.nttn.primarysummary">
 
     <application>
-        <activity android:name=".BaseTypesActivity"/>
+        <activity android:name=".chapter2_grammar.BaseTypesActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
     </application>
 </manifest>
