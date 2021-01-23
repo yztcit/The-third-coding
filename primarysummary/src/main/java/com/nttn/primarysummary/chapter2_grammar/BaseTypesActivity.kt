@@ -14,6 +14,14 @@ class BaseTypesActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_types)
         back.setOnClickListener(this)
+        tv_study.setOnClickListener(this)
+    }
+
+    fun doStudy(study: IStudy?) {
+        study?.let {
+            it.readBooks()
+            it.doHomework()
+        }
     }
 
     override fun onClick(v: View?) {
@@ -21,7 +29,10 @@ class BaseTypesActivity : AppCompatActivity(), View.OnClickListener {
             back.id -> {
                 onBackPressed();
             }
-
+            tv_study.id -> {
+                val student = Student(name = "Tom", age = 19)
+                doStudy(student)
+            }
         }
 
     }
