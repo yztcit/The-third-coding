@@ -847,11 +847,279 @@ class Student(val sno: String = "", val grade: Int = 0, name: String = "", age: 
 
 # 第3~12章 Android 基础
 
+> Android 组件、控件和UI等基础的 Kotlin 实现
 
+## 第3章 Activity
 
+### 3.1 基础知识
 
+1. 创建XXActivity，继承AppcompatActivity
+2. 创建布局
+3. 注册Manifest
 
+```kotlin
+class FirstAcitity : AppcompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.xxx)
+        val button: Button = findViewById(R.id.xxx)
+        button.setOnClickListener {
+            // do something
+        }
+        
+        // instead without findViewById
+        button.setOnClickListener {
+            
+        }
+    }
+}
+```
 
+`findViewById()`方法返回的是一个继承自 View 的泛型对象，Kotlin 无法自动推断它是什么控件，所以需要显示声明控件类型。
 
+*Kotlin 中的每个控件还要去 `findViewById()`？*
 
+**不用了！**Kotlin 编写的 Android 项目在 app/build.gradle 文件的头部默认引入了一个 `kotlin-android-extensions`插件，该插件会根据布局文件中定义的控件 `id` 自动生成一个具有相同名称的变量，因此可以在 Activity 中直接使用这个变量，从而避免重复的 `findViewById()` 。
 
+- Kotlin 语法糖：会根据 `JavaBean`中的字段自动生成相应的`Getter`和`Setter` 方法。
+
+```java
+public class Book {
+    private int pages;
+    public int getPages() {
+        return pages;
+    }
+    public void setPages(int pages) {
+        this.pages = pages
+    }
+}
+```
+
+在 Kotlin 中调用这种语法结构的 Java  方法时：
+
+```kotlin
+val book = Book()
+book.pages = 200
+val bookPages = book.pages
+```
+
+- FirstAcitivity.class  -->  FirstActivity : : class.java
+
+- Kotlin 中的 `javaClass`表示获取当前实例的 `Class`对象，相当于 Java 中调用 `getClass()`方法
+
+### 3.2 启动 Activity 的最佳写法
+
+```kotlin
+class SecondActivity : BaseActivity() {
+    ...
+    // 便于管理传递的参数
+    companion object {
+        fun acitonStart(context: Context, data1: String, data2: String) {
+            val intent = Intent(context, SecondActivity::class.java)
+            intent.putExtra("param1", data1)
+            intent.putExtra("param2", data2)
+            context.startActivity(intent)
+        }
+    }
+    
+    // 用标准函数简化
+    companion object {
+        fun anctionStart(context: Context, data1: String, data2: String) {
+            val intent = Intent(context, SecondActivity::class.java).apply {
+                putExtra("param1", data1)
+                putExtra("param2", data2)
+            }
+            context.startActivity(intent)
+        }
+    }
+}
+```
+
+### 3.3 Kotlin 课堂：标准函数和静态方法
+
+> 扩展 Kotlin 使用技巧
+
+### 3.3.1 标准函数 `with`、`run`和`apply`
+
+**Kotlin 标准函数**，指的是 `Standard.kt`文件中定义的函数，任何 Kotlin 代码都可以自由地调用所有的标准函数。
+
+*2.6.2.4*中学习的 `let`函数就是一个标准函数；
+
+- `with`函数接收两个参数：
+    - 任意类型的对象
+    - Lambda 表达式
+
+```kot
+val result = with(obj) {
+	// 这里是obj的上下文
+	"value" // with 函数的返回值
+}
+```
+
+*这个函数有什么作用呢？*
+
+它可以**在连续调用同一个对象的多个方法时让代码变得更加简洁。**
+
+比如打印水果列表：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Orange", "Pear", "Grape")
+val builder = StringBuilder()
+builder.append("Start eatting fruits.\n")
+for (fruit in list) {
+    builder.append(fruit).append("\n")
+}
+builder.append("Ate all fruits.")
+val result = builder.toString()
+println(result)
+```
+
+使用 `with`函数简化：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Orange", "Pear", "Grape")
+val result = with(StringBuilder()) {
+    append("Start eatting fruits.\n")
+    for (fruit in list) {
+        append(fruit).append("\n")
+    }
+    append("Ate all fruits.")
+    toString()
+}
+println(result)
+```
+
+- `run`函数：使用方法和 `with`函数类似，不过它不能直接调用
+    - 需要调用某个对象的`run`函数才行
+    - 只接受一个 Lambda 参数
+
+```kotlin
+val result = obj.run {
+	// 这里是obj的上下文
+    "value"
+}
+```
+
+修改水果打印代码：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Orange", "Pear", "Grape")
+val result = StringBuilder().run {
+    append("Start eatting fruits.\n")
+    for (fruit in list) {
+        append(fruit).append("\n")
+    }
+    append("Ate all fruits.")
+    toString()
+}
+println(result)
+```
+
+- `apply`函数：和上面`run`函数类似
+    - 需要在某个对象上调用
+    - 只接收一个 Lambda 参数
+    - 无法指定返回值，自动返回调用对象本身
+
+```kotlin
+val result = obj.apply {
+    // 这里是 obj 的上下文
+}
+// result = obj
+```
+
+修改水果打印代码：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Orange", "Pear", "Grape")
+val result = StringBuilder().apply {
+    append("Start eatting fruits.\n")
+    for (fruit in list) {
+        append(fruit).append("\n")
+    }
+    append("Ate all fruits.")
+}
+println(result. toString())
+```
+
+简化启动方法：
+
+```kotlin
+val intent = Intent(context, SecondActivity::class.java).apply {
+    putExtra("param1", "data1")
+    puExtra("param2", "data2")
+}
+context.startActivity(intent)
+```
+
+### 3.3.2 静态方法
+
+> 静态方法在某些编程语言中又叫做类方法，指的是那种不需要创建实例就能调用的方法。
+
+Java 中定义静态方法，只需要在方法上声明一个 `static` 关键字；
+
+Kotlin 却弱化了静态方法这个概念，提供了更好的语法特性——**单例类**
+
+像工具类这种功能，在 Kotlin 中推荐使用单例类的方式来实现。
+
+```kotlin
+object Util {
+    fun doAction() {
+        // do something
+    }
+}
+// 调用
+Util.doAction()
+```
+
+*如果只希望让类中的某一个方法变成静态方法，怎么办？*
+
+使用 `companion object`，这个关键字会在内部创建一个伴生类。
+
+```kotlin
+class Util {
+    fun doAction1() {
+        
+    }
+    companion object {
+        fun doAction2() {
+            
+        }
+    }
+}
+// 调用伴生对象的方法
+Util.doAction2()
+```
+
+以上单例类和伴生类都只是在语法形式上模拟了静态方法的调用形式，实际上他们都不是真正的静态方法。
+
+*如何定义真正的静态方法？*
+
+- 注解：`@JvmStatic`
+- 顶层方法
+
+**`@JvmStatic`注解只能加载单例类或 `companion object`中的方法上**
+
+```kotlin
+class Util {
+    fun doAction1() {
+        
+    }
+    companion object {
+        @JvmStatic
+        fun doAction2() {
+            
+        }
+    }
+}
+```
+
+**顶层方法指的是没有定义在任何类中的方法**，比如 `main()`方法。**Kotlin 编译器会将所有的顶层方法全部编译成静态方法**
+
+*创建顶层方法：*
+
+- 创建一个 Kotlin 文件，类型选择 File；
+- 在这个文件中定义的任何方法都是顶层方法。
+
+**所有的顶层方法都可以在任何地方被直接调用，不用管包名路径，也不用创建实例。**形如 `doSomething()`
+
+但是在 Java 代码中调用会找不到，Kotlin 编译器会自动创建一个 XXXKt 的 Java 类，因此可以在 Java 中使用 `XXXKt.doSomething()`的写法来调用。

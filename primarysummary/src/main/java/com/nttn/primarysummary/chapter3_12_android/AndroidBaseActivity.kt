@@ -2,8 +2,8 @@ package com.nttn.primarysummary.chapter3_12_android
 
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import com.nttn.primarysummary.R
+import com.nttn.primarysummary.base.BaseActivity
 import kotlinx.android.synthetic.main.activity_android_base.*
 
 /**
@@ -12,7 +12,7 @@ import kotlinx.android.synthetic.main.activity_android_base.*
  * Update：2021/1/23   <br>
  * Created by Apple.
  */
-class AndroidBaseActivity : AppCompatActivity(), View.OnClickListener {
+class AndroidBaseActivity : BaseActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_android_base)
