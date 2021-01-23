@@ -8,7 +8,7 @@ import android.util.Log
  * Update：2021/1/23   <br>
  * Created by Apple.
  */
-class Student(val sno: String = "", val grade: Double = 0.0, name: String = "", age: Int = 0) : Person(name, age), IStudy {
+class Student(private val sno: String = "", private val grade: Double = 0.0, name: String = "", age: Int = 0) : Person(name, age), IStudy {
     private val tag = Student::class.simpleName
     override fun readBooks() {
         Log.d(tag, "$name is $age, and $name is reading.")

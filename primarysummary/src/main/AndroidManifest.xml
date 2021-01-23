@@ -4,5 +4,7 @@
     <application>
         <activity android:name=".chapter2_grammar.BaseTypesActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity android:name=".chapter3_12_android.AndroidBaseActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
     </application>
 </manifest>

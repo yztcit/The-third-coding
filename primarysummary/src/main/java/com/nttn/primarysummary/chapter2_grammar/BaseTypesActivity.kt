@@ -17,7 +17,7 @@ class BaseTypesActivity : AppCompatActivity(), View.OnClickListener {
         tv_study.setOnClickListener(this)
     }
 
-    fun doStudy(study: IStudy?) {
+    private fun doStudy(study: IStudy?) {
         study?.let {
             it.readBooks()
             it.doHomework()
@@ -26,9 +26,8 @@ class BaseTypesActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onClick(v: View?) {
         when (v?.id) {
-            back.id -> {
-                onBackPressed();
-            }
+            back.id -> onBackPressed()
+
             tv_study.id -> {
                 val student = Student(name = "Tom", age = 19)
                 doStudy(student)
