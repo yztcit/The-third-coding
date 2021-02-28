@@ -1,0 +1,1332 @@
+# 第2章 编程之本：变量和函数
+> 编程语言之多，一篇写不下。这些语言的共有特性就是 **变量** 和 **函数**
+
+## 2.1 变量
+Kotlin中申明变量，只允许在变量前申明两种关键字：**val** 和 **var**。
+
+- val， value 的简写，用来声明一个不可变的变量。对应Java中的final变量；
+- var， variable 的简写，用来声明一个可变的变量。
+
+```kotlin
+val a = 10
+var b = "12"
+```
+
+对变量声明时就赋值的话，依赖Kotlin的类型推导机制，可以不用申明变量类型。但是如果是变量的延迟初始化，类型推导就不行了，需要制定变量类型。
+
+```kotlin
+val c: Int = 3
+```
+Kotlin抛弃了Java中的基本数据类型，采用对象数据类型。在Java中 `int` 是关键字，而在Kotlin中变成了`Int`类，它拥有自己的方法和继承结构。
+
+|Java基本数据类型|Kotlin对象数据类型|数据类型说明|
+|:---:|:---:|:---:|
+|int   |Int  |整型  |
+|long  |Long |长整型|
+|short |Short|短整型|
+|float |Float|单精度浮点型|
+|double|Double|双精度浮点型|
+|boolean|Boolean|布尔型|
+|char  |Char|字符型|
+|byte  |Byte|字节型|
+
+> *为什么要使用`val`这个关键字呢？*
+> Kotlin之所以这样设计，是为了解决Java中final关键字没有被合理使用的问题。
+> 在Java中，除非主动在变量前声明了final关键字，否则这个变量就是可变的。然而变项目变得越来越复杂，参与人员越来越多时，一个可变变量不知道什么时候就会被其他人修改了，而它原本不应该被修改。这样出现问题也不便于排查。
+> 使用`val`关键字的窍门就是：**永远优先使用 val 来声明一个变量，当val没法满足要求时再使用 var。**这样程序会更健壮！
+
+
+## 2.2 函数
+语法规则如下：
+```Kotlin
+fun methodName(param1:Int, param2:Int):Int{
+	return 0
+}
+```
+- fun（function的简写），定义函数的关键字；
+- 参数申明格式：“参数名：参数类型”。不接收参数的话，写一对空括号。
+- 返回类型根据业务选定。
+
+## 2.3 程序的控制逻辑
+### 2.3.1 if条件语句
+形如：
+```kotlin
+fun largeNum(num1:Int, num2:Int):Int{
+	var a = 0;
+	if (num1 > num2){
+		a = num1
+	} else {
+		a = num2
+	}
+	return a
+}
+```
+
+`if` 的用法和 Java 几乎没有任何区别，不过 Kotlin 中的 `if` 有个额外的功能：**它是可以有返回值的，返回值就是if语句每一个条件中最后一行代码的返回值。**
+```kotlin
+fun largeNum(num1:Int, num2:Int):Int{
+	val value = if (num1 > num2) {
+		num1
+	} else {
+		num2
+	}
+	return value
+}
+```
+进一步精简为：
+```kotlin
+fun largeNum(num1:Int, num2:Int):Int{
+	return if(num1 > num2) {
+		num1
+	} else {
+		num2
+	}
+}
+```
+**当函数只有一行代码时，可以省略函数体部分，直接将这一行代码使用等号串联在函数定义的尾部。**
+根据语法糖的使用条件，再一步精简为：
+```kotlin
+fun largeNum(num1:Int, num2:Int) = if (num1 > num2) {
+	num1
+} else {
+	num2
+}
+
+//或者这样↓
+fun largeNum(num1:Int, num2:Int) = if (num1 > num2) num1 else num2
+```
+
+### 2.3.2 when条件语句
+Kotlin中的 `when`语句有点类似 Java 中的`switch`语句，但是比它要强大的多。
+`switch`只能传入整型或短于整型的变量作为条件，JDK1.7之后增加了对字符串变量的支持，其他的类型不支持；其次，每个`case`条件还需要结合`break`使用。
+
+`when`语句允许传入一个**任意类型参数**的参数，然后可以在`when`的结构体中定义一系列的条件，格式及示例如下：
+
+**匹配值 -> { 执行逻辑 } **
+
+```kotlin
+fun getScore(name:String) = when(name) {
+	"tom" -> 86
+	"jim" -> 97
+	else -> 0
+}
+
+//不带条件参数的写法 ↓
+fun getScore(name:String) = when {
+	name.startWith("Tom") -> 86
+	name == "jim" -> 95
+	else -> 0
+}
+```
+- *当代码只有一行时，{} 是可以省略的。*
+- *Kotlin中判断字符串或对象是否相等可以直接使用 `==` 关键字，而不用像Java那样调用`equals()`方法。*
+
+除了**精确匹配** ↑ 外，还允许**类型匹配** ↓：
+```kotlin
+fun checkNumber(num:Number){
+	when(num){
+		is Int -> println("number is Int")
+		is Double -> println("number is Double")
+		else -> println("number not support")
+	}
+}
+```
+`is`关键字就是类型匹配的核心，它相当于Java中的 `instanceof`关键字。
+
+### 2.3.3 循环语句
+和Java一样提供了`while`和`for`两种循环，其中`while`循环和Java中的一致。
+Kotlin在`for`循环方面做了很大的修改，**舍弃了**Java中的`for-in`循环，大幅**加强**`for-each`循环，**变成了**`for-in`循环。
+
+Java中没有的区间概念：
+```kotlin
+//闭区间[0, 10]
+val range = 0..10
+
+//左闭右开区间 util 关键字
+//[0, 10)
+val range = 0 util 10
+
+//跳过循环中的一些元素 step 关键字
+//打印 0 2 4 6 8
+fun main(){
+	for(i in 0 util 10 step 2){
+		println(i)
+	}
+}
+
+//降序闭区间 downto 关键字
+//打印 10 到 1
+fun main(){
+	for (i in 10 downto 1){
+		println(i)
+	}
+}
+```
+
+## 2.4 面向对象编程
+>封装、继承、多态
+>
+>**类**，对事物的一种封装；类中的**字段**，表示类的属性；类中的**函数**，表示类的行为；通过对类的封装，在合适的时候创建该类的对象实例，然后调用对象中的字段和函数来满足实际编程的需要，这就是面向对象编程最基本的思想。
+
+### 2.4.1 类与对象
+与Java一致，使用`class`关键字来声明一个类。
+```kotlin
+open class Person{
+	var name = ""
+	var age = 0
+	fun eat(){
+		println("My name is " + name + ", " + age + " years old. I'm eating.")
+	}
+}
+
+//实例化时去掉了Java中 new 关键字
+val p = Person()
+```
+
+### 2.4.2 继承与构造函数
+**Kotlin中任何一个非抽象类默认都是不可以被继承的**，相当于Java中给类声明了`final`关键字。
+之所以这么设计，其实和`val`关键字的原因类似，因为类和变量一样，最好是不可以变的，而一个类允许被继承的话，它无法预知子类会如何实现，因此可能存在一些未知的风险。
+
+`open`关键字修饰的类，可被继承。
+
+```kotlin
+class Student:Person(){
+	var sno = ""
+	var grade = 0
+}
+```
+
+*为什么Person()类的后面要加上一对括号？*
+这涉及到Kotlin的**主构造函数**，**次构造函数等**。
+Java继承特性中的一个规定——**子类中的构造函数必须调用父类中的构造函数**，Kotlin也遵守这个规定。大多数场景中我们不需要写`init`结构体，因此在`init`中调用父类构造函数不是好办法。
+所以，Kotlin使用括号。子类的主构造函数调用父类中的构造函数，在继承时通过括号来指定。
+- 主构造函数，每个类默认都会有一个不带参数的主构造函数，当然也可以显示的指明参数。它的特点是**没有函数体，直接定义在类名的后面**。
+```kotlin
+class Student(val sno:String, val grade:String):Person(){
+	
+}
+
+//实例化时，必须传入它要求的参数
+val student = Student("a123", 5)
+```
+*主构造函数没有函数体，如何在主构造函数中编写一些逻辑？*
+Kotlin提供了一个`init`结构体。
+```kotlin
+class Student(val sno:String, val grade:String):Person(){
+	init{
+		println("sno is" + sno)
+		println("grade is" + grade)
+	}
+}
+
+
+open class Person(val name:String, val age:Int){
+	...
+}
+
+//注意：因为在主构造函数中声明成val或var的参数将自动成为该类的字段，这就会导致和父类中同名的name和age字段造成冲突。因此，这里的name和age参数前面不用加任何关键字。
+class Student(val sno:String, val grade:Int, name:String, age:Int):Person(name, age){
+	
+}
+```
+- 次构造函数，**任何一个类只能有一个主构造函数，但是可以有多个次构造函数**。它和主构造函数相似，不过它有函数体。**当一个类既有主构造函数又有次构造函数时，所有的次构造函数都必须调用主构造函数（包括间接调用）**。
+```kotlin
+class Student(val sno:String, val grade:Int, name:String, age:Int):Person(name, age){
+	constructor(name:String, age:Int):this("", 0, name, age){
+		
+	}
+	constructor():this("", 0){
+	
+	}
+}
+```
+
+*特殊情况*：类中只有次构造函数，没有主构造函数。
+当一个类没有显示地定义主构造函数且定义了次构造函数时，它就是没有主构造函数的。
+
+```kotlin
+class Student:Person{
+	constructor(name:String, age:Int):super(name, age){
+	
+	}
+}
+```
+
+由于没有主构造函数，次构造函数只能直接调用父类的构造函数，上述代码将`this`关键字换成了`super`关键字。
+
+### 2.4.3 接口
+
+> 接口是用来实现多态编程的重要组成部分。Java 是单继承结构的语言，任何一个类最多继承一个父类，但是可以实现任意多个接口。即**单继承，多实现**，Kotlin也是如此。
+
+先上代码：
+
+```kotlin
+interface Study {
+    fun readBooks()
+    fun doHomework()
+}
+
+class Student(name:String, age:Int) : Person(name, age),Study {
+    override fun readBooks(){
+        //do something
+    }
+    override fun doHomework(){
+        //do something
+    }
+}
+```
+
+- Java 中继承使用的是`extends`关键字，实现接口使用的是`implements`；Kotlin 中统一使用冒号`:`，中间使用逗号分隔。
+
+- Kotlin 还增加了一个额外的功能：允许对接口中定义的函数进行默认实现。Java 在 JDK1.8之后也开始支持这个功能了。
+
+```kotlin
+interface Study {
+    fun readBooks()
+    // 如果接口中的一个函数拥有了函数体，这个函数体中的内容就是它的默认实现。
+    // 当一个类实现该接口时，`doHomework()`方法不强制要求实现
+    fun doHomework() {
+        // do something
+    }
+}
+```
+
+*可见性修饰符*：
+
+| 修饰符 | Java | Kotlin |
+| :------: | :----: | :------: |
+| public | 所有类可见 | 所有类可见（默认） |
+| private | 当前类可见 | 当前类可见 |
+| protected | 当前类、子类、同一包下的类可见 | 当前类、子类可见 |
+| default | 同一包下的类可见 | 无 |
+| internal | 无 | 同一模块中的类可见 |
+
+### 2.4.4 数据类和单例类
+
+> 在一个规范的系统架构中，数据类通常占据着非常重要的角色。它们用于将服务端或数据库中的数据映射到内存中，为编程逻辑提供数据模型支持。例如 MVC、MVP、MVVM中的 M 指定就是数据类。
+
+数据类通常需要重写`equals()`、`hashcode()`、`toString()`这几个方法。其中：
+
+- `equals()` 用于判断两个数据类是否相等；
+- `hashCode()` 作为 `equals()`方法的配套方法也需要重写，否则会导致`HashMap`、`HashSet`等相关系统类无法正常工作；
+- `toString()` 用于提供更清晰的输入日志，否则默认打印一行内存地址。
+
+Java 中写法示例：
+
+```java
+public class CellPhone {
+    String brand;
+    double price;
+    
+    public CellPhone(String brand, double price) {
+        this.brand = brand;
+        this.price = price;
+    }
+    
+    @override
+    public boolean equals(Object obj) {
+        if (obj instanceOf CellPhone) {
+            CellPhone other = (CellPhone) obj;
+            reture other.brand.equals(brand) && other.price == price;
+        }
+        returen false;
+    }
+    
+    @override
+    public int hashCode(){
+        return brand.hashCode() + (int) price;
+    }
+    
+    @override
+    public String toString(){
+        return "CellPhone(brand = " + brand + ", price = " + price + ")"; 
+    }
+}
+```
+
+Kotlin 中写法示例：
+
+```kotlin
+// 当一个类中没有任何代码时，还可以将尾部的大括号省略。
+data class CellPhone(val brand: String, val price: Double)
+```
+
+二者不可同日而语！！！
+
+`data`这个关键字，表明你希望这个类是一个数据类，Kotlin 会根据**主构造函数中的参数**自动生成。
+
+
+
+> 单例模式，是最常用、最基础的设计模式之一，它可以用于避免创建重复的对象。比如我们希望某个类在全局中只有一个实例。
+
+**Kotlin 中创建一个单例类极其简单，只需要将`class`关键字改成`object`关键字即可。**
+
+```kotlin
+object Singleton {
+    fun singletonTest() {
+        // do something
+    }
+}
+// 调用
+Singleton.singletonTest()
+```
+
+以上示例可见，在 Kotlin 中我们不需要私有化构造函数，也不需要提供`getInstance()`这样的静态方法，只需要将`class`关键字改成`object`关键字即可。
+
+
+
+## 2.5 Lambda 编程
+
+> 直白阐述，Lambda 就是一小段可以作为参数传递的代码。包括函数式API、高阶函数、DSL等技巧。Java 在 JDK1.8 之后才支持，Kotlin 第一个版本就支持。
+
+### 2.5.1 集合的创建与遍历
+
+代码优先：
+
+```kotlin
+val list = ArrayList<String>()
+list.add("Apple")
+list.add("Banana")
+list.add("Pear")
+```
+
+上面这种写法与 Java 中初始化相似，比较繁琐，Kotlin 提供了一个**内置函数**`listOf()`来简化集合的初始化。
+
+```kotlin
+val list = listOf("Apple", "Banana", "Pear")
+```
+
+循环语句`for-in` 不仅可以用来遍历区间，还可以用来遍历集合：
+
+```kotlin
+fun main() {
+    val list = listOf("Apple", "Banana", "Pear")
+    for (fruit in list) {
+        println(fruit)
+    }
+}
+```
+
+- `listOf()`函数创建的是一个不可变的集合。即**该集合只能用于读取，无法对集合进行添加、修改或删除操作。**这么设计的理由和`val`关键字、类默认不可继承的设计初衷是类似的，都是在不可变性方面严格控制。
+
+*如何创建可变集合？*
+
+`mutableListOf()`函数用于创建可变集合
+
+```kotlin
+fun main() {
+    val list = mutableListOf("Apple", "Banana", "Pear")
+    list.add("Watermelon")
+    for (fruit in list) {
+        println(fruit)
+    }
+}
+```
+
+
+
+`Set`集合的用法几乎与`List`的一致，只是将创建方法换成了 `setOf()`、`mutableSetOf()`。
+
+- 注意：`Set`集合底层使用 `hash` 映射机制来存放数据，因此集合中的元素无法保证有序，这是和 `List`集合最大的不同之处。
+
+
+
+`Map` 集合是一种键值对形式的数据结构。
+
+```kotlin
+val map = HashMap<String, Int>()
+map.put("Apple", 1)
+map.put("Orange", 2)
+map.put("Pear", 3)
+```
+
+以上写法是类比 Java 语法，实际上 Kotlin 中**不建议使用`put()`和`get()`方法来对`Map`进行添加和读取操作**，**推荐使用类似于数组下标的语法结构**，例如添加和读取：
+
+```kotlin
+map["Apple"] = 1
+val number = map["Apple"]
+```
+
+因此`Map`初始化优化为：
+
+```kotlin
+val map = HashMap<String, Int>()
+map["Apple"] = 1
+map["Orange"] = 2
+map["Pear"] = 3
+```
+
+当然 Kotlin 也提供了`mapOf()`和`mutableMapOf()`函数来继续简化：
+
+```kotlin
+// 这里的键值对组合看上去好像是使用 to 这个关键字来关联的，其实 to 并不是关键字，而是一个 infix 函数！
+val map = mapOf("Apple" to 1, "Orange" to 2, "Pear" to 3)
+for ((fruit, number) in map) {
+    println("fruit is" + fruit + ", number is " + number)
+}
+```
+
+
+
+### 2.5.2 集合的函数式 API
+
+*例题：如何在一个水果集合里找到单词最长的那个水果？*
+
+```kotlin
+val list = listOf("Apple", "Banana", "Pear", "Grape", "Watermelon")
+var maxLengthFruit = ""
+for (fruit in list) {
+    if (fruit.length > maxLengthFruit.length) {
+        maxLengthFruit = fruit
+    }
+}
+println("max length fruit is " + maxlengthFruit)
+```
+
+使用集合的 **函数式 API**，例题可以简化：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Pear", "Grape", "Watermelon")
+val maxLenghtFruit = list.maxBy { it.length }
+println("max length fruit is " + maxlengthFruit)
+```
+
+**一般情况，向某个函数传参时只能传入变量，而借助 Lambda 却允许出入一小段代码！**
+
+通常不建议在 Lambda 表达式中编写太长的代码，否则可能影响代码的可读性。
+
+**Lambda 表达式的语法结构：**
+
+**{参数名1：参数类型， 参数名2：参数类型 -> 函数体}**
+
+- 首先最外层是一对大括号；
+- 如果有参数传入到 Lambda 表达式中的话，还需要声明参数列表，参数列表的结尾使用一个 -> 符号，表示产生列表的结束以及函数体的开始；
+- 函数体中可以编写任意行代码（不建议写太长，可读性差）；
+- 最后一行代码会自动作为 Lambda 表达式的返回值。
+
+**大多是时候并不需要完整的语法结构，有很多简写方法。简化写法推演：**
+
+1. 完整结构：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Pear", "Grape", "Watermelon")
+val lambda = {fruit: String -> fruit.length}
+val maxlengthFruit = list.maxBy(lambda)
+```
+
+2. 可以直接将 Lambda 表达式传入：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Pear", "Grape", "Watermelon")
+// 不需要定义一个变量
+val maxlengthFruit = list.maxBy({fruit: String -> fruit.length})
+```
+
+3. Kotlin 规定，当 Lambda 参数是函数的最后一个参数时，可以将表达式移到函数的外面：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Pear", "Grape", "Watermelon")
+// 不需要定义一个变量
+// Lambda 参数是函数的最后一个参数, 表达式移到函数外面
+val maxlengthFruit = list.maxBy(){fruit: String -> fruit.length}
+```
+
+4. 如果 Lambda参数是函数的唯一参数的话，还可以将函数的括号省略：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Pear", "Grape", "Watermelon")
+// 不需要定义一个变量
+// Lambda 参数是函数的最后一个参数, 表达式移到函数外面
+// Lambda参数是函数的唯一参数,函数的括号省略
+val maxlengthFruit = list.maxBy{fruit: String -> fruit.length}
+```
+
+5. 由于 Kotlin 拥有出色的推导机制，Lambda 表达式中的参数列表大多数情况下不必声明参数类型：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Pear", "Grape", "Watermelon")
+// 不需要定义一个变量
+// Lambda 参数是函数的最后一个参数, 表达式移到函数外面
+// Lambda参数是函数的唯一参数,函数的括号省略
+// 只有一个参数时，不必声明参数类型
+val maxlengthFruit = list.maxBy{fruit -> fruit.length}
+```
+
+6. 当 Lambda 表达式的参数列表只有一个参数时，也不必声明参数名，而是用 `it`关键字代替：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Pear", "Grape", "Watermelon")
+// 不需要定义一个变量
+// Lambda 参数是函数的最后一个参数, 表达式移到函数外面
+// Lambda参数是函数的唯一参数,函数的括号省略
+// 只有一个参数时，不必声明参数类型
+// 只有一个参数时，不必声明参数名，用 it 关键字代替
+val maxlengthFruit = list.maxBy{it.length}
+```
+
+
+
+*集合中常用的函数式 API ：*
+
+1. `map` 函数：用于将集合中的每个元素都映射成一个另外的值，映射规则在 Lambda 表达式中指定，最终生成一个新的集合。
+
+```kotlin
+// 将所有水果名变成大写
+fun main() {
+    val list = listOf("Apple", "Pear", "Banana")
+    val newList = list.map {it.toUpperCase}
+    for (fruit in newList) {
+        println(fruit)
+    }
+}
+```
+
+2. `filter` 函数：用来过滤集合中的数据的。
+
+```kotlin
+// 过滤5个字母以内的水果，并名称大写
+fun main() {
+    val list = listOf("Apple", "Pear", "Banana", "Watermelon")
+    val newList = list.filter {it.length <= 5}
+    				.map {it.toUpperCase}
+    for (fruit in newList) {
+        println(fruit)
+    }
+}
+```
+
+3. `any`和`all`函数：用于判断集合中元素满足指定条件，true or false。
+
+```kotlin
+// 长度与5比较
+fun main() {
+    val list = listOf("Apple", "Pear", "Banana", "Watermelon")
+    val anyResult = list.any {it.length <= 5} 
+    val allResult = list.all {it.length <= 5}
+    println("anyResult is" + anyResult + ", allResult is " + allResult)
+}
+```
+
+
+
+### 2.5.3 Java 函数式 API 的使用
+
+在 Kotlin 中调用 Java 方法时也可以使用函数式 API，但是有一定条件限制：
+
+*如果在 Kotlin 中调用了一个 Java 方法，并且该方法接收一个 Java 单抽象方法接口参数，就可以使用函数式 API。*
+
+> Java 单抽象方法接口，指的是接口中只有一个待实现的方法。如果接口中有多个待实现的方法，就无法使用函数式API。
+
+```↓↓
+button.setOnClickListener(new OnClickListener(){
+    @override
+    public void onClick(View v){
+        
+    }
+});
+
+// ↓↓↓
+button.setOnClickListener(v -> {});
+// ↓↓↓
+button.setOnClickListener{
+
+}
+```
+
+
+
+## 2.6 空指针检查
+
+> 空指针是一种不受编程语言检查的运行时异常，只能由程序员主动通过逻辑判断来避免...
+
+### 2.6.1 可空类型系统
+
+Kotlin 利用**编译时判空检查机制**，非常科学地解决了空指针异常问题。
+
+*可空的类型系统是什么样的呢？*——就是在**类名后加上一个问号**。
+
+比如`Int`表示不可为空的整型，`Int?`表示可空的整型。
+
+```kotlin
+fun main() {
+    doStudy(null)
+}
+
+fun doStudy(study: Study?) {
+    if (study != null) {
+        study.readBooks()
+        study.doHomework()
+    }
+}
+```
+
+为了在编译时期就处理掉所有的空指针异常，通常需要编写很多额外的检查代码。如果每处检查代码都是用`if`判断语句，则会让代码变得啰嗦，而且`if`判断语句处理不了全局变量的判空问题。为此，Kotlin 专门提供了一系列的辅助工具——
+
+
+
+### 2.6.2 辅助工具
+
+#### 2.6.2.1 ?. 判空操作符
+
+当对象不为空时调用相应的方法，为空时，什么也不做。
+
+```kotlin
+if (a != null) {
+    a.doSomething()
+}
+// 使用操作符简化
+a?.doSomething()
+```
+
+#### 2.6.2.2 ?: 判空操作符
+
+这个操作符左右两边都接收一个表达式，如果左边表达式的结果不为空就返回左边表达式的结果，否则就返回右边表达式的结果。
+
+```kotlin
+val c = if (a != null) {
+    a
+} else {
+    b
+}
+// 即
+val c = if (a !=  null) a else b
+
+// 使用操作符简化
+val c = a ?: b
+```
+
+*例题：获取一段文本的长度：*
+
+```kotlin
+fun getTextLength(text: String?) : Int {
+    if (text != null) {
+        return text.length
+    }
+    return 0
+}
+
+// 使用操作符简化
+fun getTextLength(text: String?) = text?.length ?: 0
+```
+
+#### 2.6.2.3 !! 判空操作符
+
+**全局可空变量在方法外判空不能通过编译，因为会认为方法内存在空指针风险**
+
+```kotlin
+var content: String? = "he"
+fun main() {
+    if (content != null) {
+        printUpperCase()
+    }
+}
+// 不能通过编译
+fun printUpperCase() {
+    val upperCase = content.toUpperCase()
+    println(upperCase)
+}
+```
+
+可以使用非空断言工具，写法是在对象后加 `!!`。这种写法有风险，有问题时会直接抛出空指针异常！
+
+```kotlin
+fun printUpperCase() {
+    // 这种写法有风险，有问题时会直接抛出空指针异常！
+    val upperCase = content!!.toUpperCase()
+    println(upperCase)
+}
+```
+
+#### 2.6.2.4 let 函数
+
+这个函数提供了函数式 API 的编程接口，并将原始调用对象作为参数传递到 Lambda 表达式中：
+
+```kotlin
+// 这里调用了 obj 对象的 let 函数，然后 Lambda 表达式中的代码会立即执行，并且将 obj 作为参数传递到表达式中。
+// 为防止变量重名，这里将参数名改成了 obj2，实际上是同一个对象。
+obj.let { obj2 -> 
+	// do something
+}
+```
+
+*这个`let`函数和空指针检查有什么关系呢?*
+
+`let`函数配合判空操作符，可以在空指针检查时起到很大作用。
+
+```kotlin
+fun doStudy(study: Study?) {
+    study?.readBooks()
+    study?.doHomework()
+}
+// 上述相当于进行了两次判空
+// let 函数配合判空操作符简化：
+fun doStudy(study: Study?) {
+    study?.let {stu ->
+    	stu.readBooks()
+        stu.doHomework()
+    }
+}
+// 只有一个参数，可以不用声明参数名，用 it 代替
+fun doStudy(study: Study?) {
+    study?.let {
+        it.readBooks()
+        it.doHomework()
+    }
+}
+```
+
+
+
+## 2.7 Kotlin 中的小魔术
+
+### 2.7.1 字符串内嵌表达式
+
+> 大多数高级语言是支持这个功能的，但是 Java 不支持...
+
+和加号拼接字符串说“再见”：
+
+```kotlin
+"hello, ${obj.name}, nice to meet you!"
+```
+
+当表达式中仅有一个变量时，可以省略大括号：
+
+```kotlin
+"hello, $name, nice to meet you!"
+```
+
+### 2.7.2 函数的参数默认值
+
+次构造函数在 Kotlin 中很少使用，是因为 Kotlin 提供给函数设定参数默认值的功能，它在很大程度上能够代替次构造函数的作用。
+
+**在定义函数时给任意参数设定一个默认值，这样当调用此函数时就不会强制要求调用者为此参数传值，会自动使用参数的默认值。**
+
+```kotlin
+fun printParams(num: Int, str: String = "hi") {
+    println("num is $num, str is $str")
+}
+
+fun main() {
+    // log: num is 123, str is hi
+    printParams(123)
+}
+```
+
+还可以通过键值对的方式来传参，从而不必按照参数定义的顺序来传参：
+
+```kotlin
+printParams(str = "Hello", num = 321)
+```
+
+*为什么说这个功能可以在很大程度上替代次构造函数呢？*
+
+```kotlin
+class Student(val sno: String, val grade: Int, name: String, age: Int) : Person(name, age) {
+    constructor(name: String, age: Int) : this("", 0, name, age) {
+        
+    }
+    
+    constructor() : this("", 0) {
+        
+    }
+}
+```
+
+使用默认参数的方式来实现：
+
+```kotlin
+class Student(val sno: String = "", val grade: Int = 0, name: String = "", age: Int = 0) : 
+	Person(name, age) {
+    
+}
+```
+
+
+
+
+
+# 第3~12章 Android 基础
+
+> Android 组件、控件和UI等基础的 Kotlin 实现
+
+## 第3章 Activity
+
+### 3.1 基础知识
+
+1. 创建XXActivity，继承AppcompatActivity
+2. 创建布局
+3. 注册Manifest
+
+```kotlin
+class FirstAcitity : AppcompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.xxx)
+        val button: Button = findViewById(R.id.xxx)
+        button.setOnClickListener {
+            // do something
+        }
+        
+        // instead without findViewById
+        button.setOnClickListener {
+            
+        }
+    }
+}
+```
+
+`findViewById()`方法返回的是一个继承自 View 的泛型对象，Kotlin 无法自动推断它是什么控件，所以需要显示声明控件类型。
+
+*Kotlin 中的每个控件还要去 `findViewById()`？*
+
+**不用了！**Kotlin 编写的 Android 项目在 app/build.gradle 文件的头部默认引入了一个 `kotlin-android-extensions`插件，该插件会根据布局文件中定义的控件 `id` 自动生成一个具有相同名称的变量，因此可以在 Activity 中直接使用这个变量，从而避免重复的 `findViewById()` 。
+
+- Kotlin 语法糖：会根据 `JavaBean`中的字段自动生成相应的`Getter`和`Setter` 方法。
+
+```java
+public class Book {
+    private int pages;
+    public int getPages() {
+        return pages;
+    }
+    public void setPages(int pages) {
+        this.pages = pages
+    }
+}
+```
+
+在 Kotlin 中调用这种语法结构的 Java  方法时：
+
+```kotlin
+val book = Book()
+book.pages = 200
+val bookPages = book.pages
+```
+
+- FirstAcitivity.class  -->  FirstActivity : : class.java
+
+- Kotlin 中的 `javaClass`表示获取当前实例的 `Class`对象，相当于 Java 中调用 `getClass()`方法
+
+### 3.2 启动 Activity 的最佳写法
+
+```kotlin
+class SecondActivity : BaseActivity() {
+    ...
+    // 便于管理传递的参数
+    companion object {
+        fun acitonStart(context: Context, data1: String, data2: String) {
+            val intent = Intent(context, SecondActivity::class.java)
+            intent.putExtra("param1", data1)
+            intent.putExtra("param2", data2)
+            context.startActivity(intent)
+        }
+    }
+    
+    // 用标准函数简化
+    companion object {
+        fun anctionStart(context: Context, data1: String, data2: String) {
+            val intent = Intent(context, SecondActivity::class.java).apply {
+                putExtra("param1", data1)
+                putExtra("param2", data2)
+            }
+            context.startActivity(intent)
+        }
+    }
+}
+```
+
+### 3.3 Kotlin 课堂：标准函数和静态方法
+
+> 扩展 Kotlin 使用技巧
+
+### 3.3.1 标准函数 `with`、`run`和`apply`
+
+**Kotlin 标准函数**，指的是 `Standard.kt`文件中定义的函数，任何 Kotlin 代码都可以自由地调用所有的标准函数。
+
+*2.6.2.4*中学习的 `let`函数就是一个标准函数；
+
+- `with`函数接收两个参数：
+    - 任意类型的对象
+    - Lambda 表达式
+
+```kot
+val result = with(obj) {
+	// 这里是obj的上下文
+	"value" // with 函数的返回值
+}
+```
+
+*这个函数有什么作用呢？*
+
+它可以**在连续调用同一个对象的多个方法时让代码变得更加简洁。**
+
+比如打印水果列表：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Orange", "Pear", "Grape")
+val builder = StringBuilder()
+builder.append("Start eatting fruits.\n")
+for (fruit in list) {
+    builder.append(fruit).append("\n")
+}
+builder.append("Ate all fruits.")
+val result = builder.toString()
+println(result)
+```
+
+使用 `with`函数简化：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Orange", "Pear", "Grape")
+val result = with(StringBuilder()) {
+    append("Start eatting fruits.\n")
+    for (fruit in list) {
+        append(fruit).append("\n")
+    }
+    append("Ate all fruits.")
+    toString()
+}
+println(result)
+```
+
+- `run`函数：使用方法和 `with`函数类似，不过它不能直接调用
+    - 需要调用某个对象的`run`函数才行
+    - 只接受一个 Lambda 参数
+
+```kotlin
+val result = obj.run {
+	// 这里是obj的上下文
+    "value"
+}
+```
+
+修改水果打印代码：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Orange", "Pear", "Grape")
+val result = StringBuilder().run {
+    append("Start eatting fruits.\n")
+    for (fruit in list) {
+        append(fruit).append("\n")
+    }
+    append("Ate all fruits.")
+    toString()
+}
+println(result)
+```
+
+- `apply`函数：和上面`run`函数类似
+    - 需要在某个对象上调用
+    - 只接收一个 Lambda 参数
+    - 无法指定返回值，自动返回调用对象本身
+
+```kotlin
+val result = obj.apply {
+    // 这里是 obj 的上下文
+}
+// result = obj
+```
+
+修改水果打印代码：
+
+```kotlin
+val list = listOf("Apple", "Banana", "Orange", "Pear", "Grape")
+val result = StringBuilder().apply {
+    append("Start eatting fruits.\n")
+    for (fruit in list) {
+        append(fruit).append("\n")
+    }
+    append("Ate all fruits.")
+}
+println(result. toString())
+```
+
+简化启动方法：
+
+```kotlin
+val intent = Intent(context, SecondActivity::class.java).apply {
+    putExtra("param1", "data1")
+    puExtra("param2", "data2")
+}
+context.startActivity(intent)
+```
+
+### 3.3.2 静态方法
+
+> 静态方法在某些编程语言中又叫做类方法，指的是那种不需要创建实例就能调用的方法。
+
+Java 中定义静态方法，只需要在方法上声明一个 `static` 关键字；
+
+Kotlin 却弱化了静态方法这个概念，提供了更好的语法特性——**单例类**
+
+像工具类这种功能，在 Kotlin 中推荐使用单例类的方式来实现。
+
+```kotlin
+object Util {
+    fun doAction() {
+        // do something
+    }
+}
+// 调用
+Util.doAction()
+```
+
+*如果只希望让类中的某一个方法变成静态方法，怎么办？*
+
+使用 `companion object`，这个关键字会在内部创建一个伴生类。
+
+```kotlin
+class Util {
+    fun doAction1() {
+        
+    }
+    companion object {
+        fun doAction2() {
+            
+        }
+    }
+}
+// 调用伴生对象的方法
+Util.doAction2()
+```
+
+以上单例类和伴生类都只是在语法形式上模拟了静态方法的调用形式，实际上他们都不是真正的静态方法。
+
+*如何定义真正的静态方法？*
+
+- 注解：`@JvmStatic`
+- 顶层方法
+
+**`@JvmStatic`注解只能加载单例类或 `companion object`中的方法上**
+
+```kotlin
+class Util {
+    fun doAction1() {
+        
+    }
+    companion object {
+        @JvmStatic
+        fun doAction2() {
+            
+        }
+    }
+}
+```
+
+**顶层方法指的是没有定义在任何类中的方法**，比如 `main()`方法。**Kotlin 编译器会将所有的顶层方法全部编译成静态方法**
+
+*创建顶层方法：*
+
+- 创建一个 Kotlin 文件，类型选择 File；
+- 在这个文件中定义的任何方法都是顶层方法。
+
+**所有的顶层方法都可以在任何地方被直接调用，不用管包名路径，也不用创建实例。**形如 `doSomething()`
+
+但是在 Java 代码中调用会找不到，Kotlin 编译器会自动创建一个 XXXKt 的 Java 类，因此可以在 Java 中使用 `XXXKt.doSomething()`的写法来调用。
+
+
+
+## 第4章 UI界面
+
+### 4.1 常用布局和控件
+
+> 推荐使用`ConstraintLayout`来开发程序界面，减少布局层级。
+
+- 布局
+    - `RelativeLayout`，相对布局；
+    - `LinearLayout`，线性布局；
+    - `FrameLayout`，帧布局
+- 控件
+    - `TextView`，纯文本控件；
+    - `EditText`，输入控件；
+    - `Button`，按钮控件；
+    - `ImageView`，图片加载控件；
+    - `ProgressBar`，进度控件；
+    - `AlertDialog`，弹窗控件
+- 自定义控件
+    - 系统控件的组合
+    - 继承`View`或`ViewGroup`
+
+### 4.2 Kotlin 知识点
+
+#### 4.2.1 as 关键字
+
+__类型的强制转换__使用 `as` 关键字。
+
+```kotlin
+val activity = context as Activity
+```
+
+#### 4.2.2 repeat 函数
+
+__`repeat`__ 函数，允许传入一个数值 n，然后把 Lambda 表达式中的内容执行 n 遍。
+
+```kotlin
+private val fruitList = ArrayList<Fruit>()
+// 将三种水果重复添加两遍
+private fun initFruits() {
+    repeat(2) {
+        fruitList.add(Fruit("Apple"))
+        fruitList.add(Fruit("Banana"))
+        fruitList.add(Fruit("Watermelon"))
+    }
+}
+```
+
+#### 4.2.3 内部类关键字 inner class 
+
+使用 __`inner class`__关键字来定义内部类。
+
+```kotlin
+class FruitAdapter(activity : Activity, val resId : Int, data : List<Fruit>) : ArrayAdapter<Fruit>(activity, resId, data) {
+    inner class ViewHolder (val fruitImage: ImageView, val fruitName: TextView)
+}
+```
+
+Lambda 表达式中声明了多个参数，未使用的可以用下划线替代：
+
+```kotlin
+listView.setOnItemClickListener {_, _, position, _ -> 
+    val fruit = fruitList[position]                 
+}
+
+public interface OnItemClickListener {
+    void onItemClick(AdapterView<?> parent, View view, int position, long id);
+}
+```
+
+#### 4.2.4 Range 函数创造随机数
+
+```kotlin
+val n = (1..20).random()
+```
+
+
+
+### 4.3 Kotlin 课堂：延迟初始化和密封类
+
+#### 4.3.1 对变量延迟初始化
+
+对于类中存在许多全局变量的场景，为了保证它们能够满足 Kotlin 空指针检查机制，我们不得不做许多非空判断，即使非常确定它们不会为空。
+
+```kotlin
+class MainActivity : AppcompatActivity(), View.OnClickListener {
+    private var adapter: MsgAdapter? = null
+    override fun onCreate(saveInstanceState: Bundle?) {
+        ...
+        adatper = MsgAdapter(msgList)
+        ...
+    }
+    
+    override fun onClick(view: View?) {
+        ...
+        adapter?.notifyItemInsterted(msgList.size - 1)
+        ...
+    }
+}
+```
+
+这里将 adapter 设置为全局变量，但是它的初始化是在 `onCreate()` 方法中，因此不得不先将 adapter 赋值为 null，同时把它的类型声明成 `MsgAdapter?` 。
+
+虽然我们会在 `onCreate()` 方法中对 adapter 进行初始化，同时确保 `onClick()` 方法必须在 `onCreate()` 方法之后才会调用，但是调用 adapter 的任何方法仍需进行判空处理，否则无法通过编译。
+
+当代码中全局变量越来越多，就需要编写大量额外的判空处理代码，只是为了满足 Kotlin 的便已要求。
+
+__延迟初始化__使用 `lateinit` 关键字，它可以告诉 Kotlin 编译器，我会在晚些时候对变量进行初始化，这样就不用在一开始将它赋值为null。
+
+```kotlin
+class MainActivity : AppcompatActivity(), View.OnClickListener {
+    private lateinit var adapter: MsgAdapter
+    override fun onCreate(saveInstanceState: Bundle?) {
+        ...
+        adapter = MsgAdapter(msgList)
+        ...
+    }
+    override onClick(view: View?) {
+        ...
+        adapter.notifyItemInstered(msgList.size - 1)
+    }
+}
+```
+
+使用延迟初始化的__风险__:
+
+如果在 adapter 尚未初始化时就是用它，那么程序就会崩溃，并且抛出一个 `UninitiallizedPropertyAccessException` 异常。
+
+因此，__当对一个全局变量使用了 `lateinit` 关键字，请确保它在被任何地方调用之前已经完成初始化，否则 Kotlin 无法保证程序的安全性。__
+
+__判断全局变量是否已经完成初始化__：
+
+```kotlin
+class MainActivity : AppcompatActivity(), View.OnClickListener {
+    private lateinit var adapter: MsgAdpater
+    override fun onCreate(saveInstanceState: Bundle?) {
+        ...
+        if (::adapter.isInitiallized) {
+            adapter = MsgAdapter(msgList)
+        }
+        ...
+    }
+}
+```
+
+即：__::xxx.isInitialized__
+
+#### 4.3.2 使用密封类优化代码
+
+密封类通常可以结合 `RecyclerView` 适配器中的 `ViewHolder` 一起使用。当然密封类的使用场景远不止如此，它可以在很多时候帮助我们写出更加规范和安全的代码。
+
+通过一个简单的例子，了解密封类：
+
+新建一个 Kotlin 文件，文件名如 `Result.kt`，文件中的代码如下：
+
+```kotlin
+interface Result
+class Success(val msg: String) : Result
+class Failure(valr error: Exception) : Result
+```
+
+以上，定义了一个接口和其实现类，再定义一个方法，用于获取最终结果：
+
+```kotlin
+fun getResultMsg(result: Result) = when (result) {
+    is Success -> result.msg
+    is Failure -> result.error.message
+    else -> throw IllegalArgumentException()
+}
+```
+
+实际上，`else` 分支永远走不到，但是为了满足编译还必须编写该分支。
+
+另外，还有一个风险——如果新增了一个 `Unknown` 类并实现 `Result` 接口，用于表示未知结果，但是忘记在 `getResultMsg()` 方法中添加相应的条件分支，编译器在这种情况下不会提示，而是在运行时进入 `else` 条件里。
+
+为了满足编译条件而编写无用条件分支的情况，在其他编程语言中也普遍存在。
+
+**密封类的关键字 `sealed class`**， 写法：
+
+```kotlin
+sealed class Result
+class Success(val msg: String) : Result()
+class Failure(valr error: Exception) : Result()
+```
+
+**密封类是可被继承的类，因此在继承它时需要在后面加上一对括号**
+
+**Kotlin 编译器会自动检查该密封类有哪些子类，并强制要求处理每一个子类条件。**
+
+**密封类及其所有子类只能定义在同一个文件的顶层位置，不能嵌套在其他类中。**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
