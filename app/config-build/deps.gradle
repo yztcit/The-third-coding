@@ -10,6 +10,7 @@ def void applyDependencies(Project project) {
         androidTestImplementation Dependencies.espresso
 
         implementation deps.components.lib_primary_summary
+        implementation deps.components.lib_permissionx
     }
 }
 

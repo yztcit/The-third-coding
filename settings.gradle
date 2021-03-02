@@ -5,7 +5,8 @@ def deps = [:]
 
 // 组件层，主要包含基于标准库封装提供通用能力的lib、基于某一块业务的独立AAR、JAR
 def components = [
-        lib_primary_summary: includeProject(":primarysummary")
+        lib_primary_summary: includeProject(":primarysummary"),
+        lib_permissionx: includeProject(":permissionx")
 ]
 
 deps.components = components
