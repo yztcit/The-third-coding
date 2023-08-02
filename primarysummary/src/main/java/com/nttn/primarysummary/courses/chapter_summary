@@ -1318,6 +1318,80 @@ class Failure(valr error: Exception) : Result()
 
 
 
+## 第5章 Fragment
+
+> `Fragment` 是可以嵌入到 `Activity` 中的 UI 片段，它能够让程序更加合理和充分的利用大屏幕的空间，因而在平板上应用的非常广泛。
+
+### 5.1 基本知识
+
+系统内置的__android.app.Fragment__在 Android 9.0 版本中已被废弃，建议使用 __AndroidX__库中的。
+
+*添加 `fragment`：*
+
+- 静态添加，通过 `<fragment>` 标签；
+- 动态添加，5步：
+    1. 创建待添加的 fragment 实例；
+    2. 获取 `FragmentManager` ，在 `Activity` 中可以直接通过 `getSupportFragmentManager()` 方法获取；
+    3. 开启一个事务，通过调用 `beginTransaction()` 方法；
+    4. 向容器中添加或替换 fragment；
+    5. 提交事务。
+
+
+
+*在 Fragment 中实现返回栈*
+
+`FragmentTransaction` 中提供了一个 `addToBackStack()`方法，它接受一个名字用于描述返回栈的状态，一般传 `null` 即可。
+
+### 5.2 Kotlin 课堂：扩展函数和运算符重载
+
+#### 5.2.1 扩展函数
+
+**扩展函数**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
